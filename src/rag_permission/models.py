@@ -7,6 +7,9 @@ class User:
     id: str
     groups: frozenset[str] = frozenset()
 
+    def can_access(self, acl_groups: tuple[str, ...] | frozenset[str] | list[str]) -> bool:
+        return bool(self.groups & frozenset(acl_groups))
+
 
 @dataclass(frozen=True, slots=True)
 class ParsedElement:

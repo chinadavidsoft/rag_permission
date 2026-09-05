@@ -71,3 +71,11 @@ def test_hybrid_retriever_denies_empty_user():
     index.add_documents(chunks)
     retriever = HybridRetriever(embedding, store, index)
     assert retriever.search("E-1002", User(id="u")) == []
+
+
+def test_user_can_access_set_intersection():
+    user = User(id="u", groups=frozenset({"public", "eng"}))
+    assert user.can_access(("public",))
+    assert user.can_access(frozenset({"eng"}))
+    assert not user.can_access(("hr",))
+    assert not User(id="u").can_access(("public",))
