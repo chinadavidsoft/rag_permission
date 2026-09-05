@@ -1,6 +1,7 @@
 import pytest
 
 from rag_permission.evaluation import mean_reciprocal_rank, precision_at_k, recall_at_k, reciprocal_rank
+from rag_permission.evaluation.runner import RetrievalEvaluation, summarize_evaluations
 
 
 def test_recall_at_k_exact_match():
@@ -72,3 +73,15 @@ def test_mean_reciprocal_rank_is_order_sensitive():
         [["b", "a"], ["a", "b"]], [["a"], ["a"]], 2
     )
     assert value == pytest.approx((0.5 + 1.0) / 2)
+
+
+def test_summarize_excludes_empty_expected_from_mean():
+    results = [
+        RetrievalEvaluation("q1", ("public",), ("a",), 1, 1.0, 1.0, 1.0, False),
+        RetrievalEvaluation("q2", (), (), 0, 0.0, 0.0, 0.0, False),
+    ]
+    summary = summarize_evaluations(results)
+    assert summary.case_count == 2
+    assert summary.recall == 1.0
+    assert summary.precision == 1.0
+    assert summary.mrr == 1.0

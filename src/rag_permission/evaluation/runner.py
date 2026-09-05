@@ -37,6 +37,7 @@ class RetrievalEvaluation:
     query: str
     user_groups: tuple[str, ...]
     retrieved_chunk_ids: tuple[str, ...]
+    expected_count: int
     recall: float
     precision: float
     mrr: float
@@ -56,12 +57,13 @@ class RetrievalSummary:
 def summarize_evaluations(results: list[RetrievalEvaluation]) -> RetrievalSummary:
     if not results:
         return RetrievalSummary(0, 0, 0.0, 0.0, 0.0, 0)
+    scored = [result for result in results if result.expected_count > 0]
     return RetrievalSummary(
         case_count=len(results),
         nonempty_hit_cases=sum(bool(result.retrieved_chunk_ids) for result in results),
-        recall=sum(result.recall for result in results) / len(results),
-        precision=sum(result.precision for result in results) / len(results),
-        mrr=sum(result.mrr for result in results) / len(results),
+        recall=sum(result.recall for result in scored) / len(scored),
+        precision=sum(result.precision for result in scored) / len(scored),
+        mrr=sum(result.mrr for result in scored) / len(scored),
         leakage_cases=sum(result.leakage for result in results),
     )
 
@@ -73,6 +75,7 @@ def evaluate_case(case: GoldenCase, hits: list[SearchHit], k: int = 8) -> Retrie
         query=case.query,
         user_groups=case.user_groups,
         retrieved_chunk_ids=tuple(retrieved),
+        expected_count=len(case.relevant_chunk_ids),
         recall=recall_at_k(retrieved, relevant, k),
         precision=precision_at_k(retrieved, relevant, k),
         mrr=reciprocal_rank(retrieved, relevant, k),
