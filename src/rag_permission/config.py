@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -16,6 +17,9 @@ class Settings(BaseSettings):
     hf_endpoint: str = "https://hf-mirror.com"
     hf_hub_disable_xet: bool = True
     enable_rerank: bool = True
+    auth_mode: Literal["jwt", "trusted_header"] = "jwt"
+    auth_secret: str = ""
+    auth_token_ttl_minutes: int = 60
 
     fixture_dir: Path = Path("fixtures")
     chunk_size: int = 260
@@ -25,5 +29,8 @@ class Settings(BaseSettings):
     dense_top_k: int = 24
     bm25_top_k: int = 24
     final_top_k: int = 8
+
+    prompt_cost_per_1k: float = 0.0
+    completion_cost_per_1k: float = 0.0
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

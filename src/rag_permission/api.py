@@ -8,8 +8,10 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
+from rag_permission.auth import decode_access_token
 from rag_permission.config import Settings
 from rag_permission.models import User
+from rag_permission.observability import token_cost
 from rag_permission.runtime import RAGService, build_runtime
 
 
@@ -23,17 +25,28 @@ class FeedbackRequest(BaseModel):
     comment: str = ""
 
 
-def current_user(
-    x_user_id: str = Header(...),
-    x_user_groups: str = Header(default=""),
-) -> User:
-    # Demo authentication only. In production, replace this with gateway/JWT verification.
-    groups = frozenset(group.strip() for group in x_user_groups.split(",") if group.strip())
-    return User(id=x_user_id, groups=groups)
-
-
 def create_app(settings: Settings | None = None, runtime: RAGService | None = None) -> FastAPI:
     settings = settings or Settings()
+
+    def current_user(
+        authorization: str | None = Header(default=None),
+        x_user_id: str | None = Header(default=None),
+        x_user_groups: str | None = Header(default=None),
+    ) -> User:
+        if settings.auth_mode == "jwt":
+            if not authorization or not authorization.startswith("Bearer "):
+                raise HTTPException(status_code=401, detail="Bearer token required")
+            try:
+                return decode_access_token(authorization.removeprefix("Bearer "), settings.auth_secret)
+            except Exception as error:
+                raise HTTPException(status_code=401, detail="Invalid access token") from error
+
+        if not x_user_id:
+            raise HTTPException(status_code=401, detail="X-User-Id required")
+        groups = frozenset(
+            group.strip() for group in (x_user_groups or "").split(",") if group.strip()
+        )
+        return User(id=x_user_id, groups=groups)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -61,6 +74,18 @@ def create_app(settings: Settings | None = None, runtime: RAGService | None = No
             "citations": [asdict(citation) for citation in result.citations],
             "citation_report": asdict(result.citation_report),
             "usage": asdict(result.usage),
+            "cost": {
+                "prompt": token_cost(result.usage.prompt_tokens, 0, settings.prompt_cost_per_1k),
+                "completion": token_cost(
+                    0, result.usage.completion_tokens, 0, settings.completion_cost_per_1k
+                ),
+                "total": token_cost(
+                    result.usage.prompt_tokens,
+                    result.usage.completion_tokens,
+                    settings.prompt_cost_per_1k,
+                    settings.completion_cost_per_1k,
+                ),
+            },
             "trace_id": result.trace_id,
         }
 
@@ -75,6 +100,7 @@ def create_app(settings: Settings | None = None, runtime: RAGService | None = No
                     event_name = "token"
                 elif hasattr(event, "citations"):
                     payload_data = {
+                        "answer": event.answer,
                         "citations": [asdict(citation) for citation in event.citations],
                         "citation_report": asdict(event.citation_report),
                         "usage": asdict(event.usage),

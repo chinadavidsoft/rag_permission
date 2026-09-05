@@ -21,6 +21,16 @@ class FailureCluster:
     queries: tuple[str, ...]
 
 
+@dataclass(frozen=True, slots=True)
+class UsageSummary:
+    trace_count: int
+    prompt_tokens: int
+    completion_tokens: int
+    prompt_cost: float
+    completion_cost: float
+    total_cost: float
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -58,6 +68,19 @@ class FeedbackStore:
                 );
                 """
             )
+        columns = {row["name"] for row in self._connection.execute("PRAGMA table_info(qa_traces)")}
+        if "prompt_cost" not in columns:
+            self._connection.execute(
+                "ALTER TABLE qa_traces ADD COLUMN prompt_cost REAL NOT NULL DEFAULT 0"
+            )
+        if "completion_cost" not in columns:
+            self._connection.execute(
+                "ALTER TABLE qa_traces ADD COLUMN completion_cost REAL NOT NULL DEFAULT 0"
+            )
+        if "total_cost" not in columns:
+            self._connection.execute(
+                "ALTER TABLE qa_traces ADD COLUMN total_cost REAL NOT NULL DEFAULT 0"
+            )
 
     def record_trace(
         self,
@@ -68,14 +91,18 @@ class FeedbackStore:
         hits: list[SearchHit],
         citations: list[Citation],
         usage: LLMUsage,
+        prompt_cost: float = 0.0,
+        completion_cost: float = 0.0,
     ) -> None:
+        total_cost = prompt_cost + completion_cost
         with self._lock, self._connection as connection:
             connection.execute(
                 """
                 INSERT OR REPLACE INTO qa_traces
                 (trace_id, created_at, user_id, query, answer, retrieved_ids,
-                 citations, prompt_tokens, completion_tokens)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 citations, prompt_tokens, completion_tokens, prompt_cost,
+                 completion_cost, total_cost)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     trace_id,
@@ -87,6 +114,9 @@ class FeedbackStore:
                     json.dumps([asdict(citation) for citation in citations], ensure_ascii=False),
                     usage.prompt_tokens,
                     usage.completion_tokens,
+                    prompt_cost,
+                    completion_cost,
+                    total_cost,
                 ),
             )
 
@@ -146,3 +176,25 @@ class FeedbackStore:
             )
             for (week_start_value, doc_id, title), queries in sorted(clusters.items())
         ]
+
+    def usage_summary(self) -> UsageSummary:
+        with self._lock, self._connection as connection:
+            row = connection.execute(
+                """
+                SELECT COUNT(*) AS trace_count,
+                       COALESCE(SUM(prompt_tokens), 0) AS prompt_tokens,
+                       COALESCE(SUM(completion_tokens), 0) AS completion_tokens,
+                       COALESCE(SUM(prompt_cost), 0) AS prompt_cost,
+                       COALESCE(SUM(completion_cost), 0) AS completion_cost,
+                       COALESCE(SUM(total_cost), 0) AS total_cost
+                FROM qa_traces
+                """
+            ).fetchone()
+        return UsageSummary(
+            trace_count=row["trace_count"],
+            prompt_tokens=row["prompt_tokens"],
+            completion_tokens=row["completion_tokens"],
+            prompt_cost=row["prompt_cost"],
+            completion_cost=row["completion_cost"],
+            total_cost=row["total_cost"],
+        )

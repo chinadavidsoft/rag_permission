@@ -14,9 +14,9 @@ from rag_permission.generation import (
     stream_answer,
 )
 from rag_permission.ingest_pipeline import IngestionPipeline
-from rag_permission.llm import LLMClient, OpenAILLMClient
+from rag_permission.llm import LLMClient, LLMUsage, OpenAILLMClient
 from rag_permission.models import SearchHit, User
-from rag_permission.observability import InMemoryTracer, NullTracer, Tracer
+from rag_permission.observability import InMemoryTracer, NullTracer, Tracer, token_cost
 from rag_permission.reranker import BGEReranker, Reranker
 from rag_permission.retriever import HybridRetriever
 from rag_permission.vector_store import QdrantVectorStore, create_qdrant_client
@@ -29,11 +29,21 @@ class RAGService:
         llm: LLMClient,
         feedback_store: FeedbackStore,
         tracer: Tracer | None = None,
+        prompt_cost_per_1k: float = 0.0,
+        completion_cost_per_1k: float = 0.0,
     ):
         self.retriever = retriever
         self.llm = llm
         self.feedback_store = feedback_store
         self.tracer = tracer or NullTracer()
+        self.prompt_cost_per_1k = prompt_cost_per_1k
+        self.completion_cost_per_1k = completion_cost_per_1k
+
+    def _costs(self, usage: LLMUsage) -> tuple[float, float]:
+        return (
+            token_cost(usage.prompt_tokens, 0, self.prompt_cost_per_1k),
+            token_cost(0, usage.completion_tokens, 0.0, self.completion_cost_per_1k),
+        )
 
     def _retrieve(self, query: str, user: User, trace_id: str) -> list[SearchHit]:
         with self.tracer.span("retrieve", trace_id, {"user_id": user.id}):
@@ -44,6 +54,7 @@ class RAGService:
         hits = self._retrieve(query, user, trace_id)
         with self.tracer.span("generate", trace_id, {"hit_count": len(hits)}):
             result = generate_answer(query, hits, self.llm, trace_id=trace_id, tracer=self.tracer)
+        prompt_cost, completion_cost = self._costs(result.usage)
         self.feedback_store.record_trace(
             trace_id=trace_id,
             user=user,
@@ -52,6 +63,8 @@ class RAGService:
             hits=hits,
             citations=result.citations,
             usage=result.usage,
+            prompt_cost=prompt_cost,
+            completion_cost=completion_cost,
         )
         return result
 
@@ -69,6 +82,8 @@ class RAGService:
             yield event
         if final_result is not None:
             final_usage = final_result.usage
+            prompt_cost, completion_cost = self._costs(final_usage)
+            answer = final_result.answer
             self.feedback_store.record_trace(
                 trace_id=trace_id,
                 user=user,
@@ -77,6 +92,8 @@ class RAGService:
                 hits=hits,
                 citations=final_result.citations,
                 usage=final_usage,
+                prompt_cost=prompt_cost,
+                completion_cost=completion_cost,
             )
 
 
@@ -124,4 +141,6 @@ def build_runtime(settings: Settings) -> RAGService:
         llm=llm,
         feedback_store=FeedbackStore(settings.sqlite_path),
         tracer=InMemoryTracer(),
+        prompt_cost_per_1k=settings.prompt_cost_per_1k,
+        completion_cost_per_1k=settings.completion_cost_per_1k,
     )

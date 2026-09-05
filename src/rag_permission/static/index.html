@@ -62,8 +62,7 @@
     <header>
       <div class="brand">企业知识库问答</div>
       <div class="auth">
-        <input id="userId" class="field" value="public-user" aria-label="用户 ID">
-        <input id="userGroups" class="field" value="public" aria-label="用户组">
+        <input id="accessToken" class="field" type="password" placeholder="访问令牌" aria-label="访问令牌">
       </div>
     </header>
     <main id="chat" class="chat">
@@ -145,8 +144,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-User-Id': document.getElementById('userId').value,
-            'X-User-Groups': document.getElementById('userGroups').value,
+            Authorization: `Bearer ${document.getElementById('accessToken').value}`,
           },
           body: JSON.stringify({ query: question }),
         });
@@ -170,6 +168,7 @@
             const payload = JSON.parse(data);
             if (eventName === 'token') { content.textContent += payload.content; scrollDown(); }
             if (eventName === 'citations') {
+              if (payload.answer) content.textContent = payload.answer;
               payload.citations.forEach(item => citations.append(citationCard(item)));
               currentTrace = payload.trace_id;
               answer.append(feedbackButtons());

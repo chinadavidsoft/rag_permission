@@ -24,6 +24,11 @@ services:
       HF_ENDPOINT: ${HF_ENDPOINT:-https://hf-mirror.com}
       SQLITE_PATH: /app/data/rag_permission.db
       ENABLE_RERANK: ${ENABLE_RERANK:-true}
+      AUTH_MODE: ${AUTH_MODE:-jwt}
+      AUTH_SECRET: ${AUTH_SECRET}
+      AUTH_TOKEN_TTL_MINUTES: ${AUTH_TOKEN_TTL_MINUTES:-60}
+      PROMPT_COST_PER_1K: ${PROMPT_COST_PER_1K:-0}
+      COMPLETION_COST_PER_1K: ${COMPLETION_COST_PER_1K:-0}
     depends_on:
       qdrant:
         condition: service_healthy
