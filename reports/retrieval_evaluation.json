@@ -1,0 +1,444 @@
+{
+  "baseline": [
+    {
+      "query": "E-1002 是什么故障？",
+      "user_groups": [
+        "public"
+      ],
+      "retrieved_chunk_ids": [
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:2:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:3:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:1:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "E-1003 应该怎么处理？",
+      "user_groups": [
+        "public"
+      ],
+      "retrieved_chunk_ids": [
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:2:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:3:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:1:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "设备连续运行 500 小时后要做什么？",
+      "user_groups": [
+        "public"
+      ],
+      "retrieved_chunk_ids": [
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:3:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:1:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:2:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "E001 怎么处理？",
+      "user_groups": [
+        "eng"
+      ],
+      "retrieved_chunk_ids": [
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:2:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:1:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:3:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "E002 的处理动作是什么？",
+      "user_groups": [
+        "eng"
+      ],
+      "retrieved_chunk_ids": [
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:2:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:1:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:3:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "更换发动机部件后要记录什么？",
+      "user_groups": [
+        "eng"
+      ],
+      "retrieved_chunk_ids": [
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:3:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:1:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:2:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "劳动法规考试占比多少？",
+      "user_groups": [
+        "hr"
+      ],
+      "retrieved_chunk_ids": [
+        "6cc7cb5e5f7f894deb06e8227f2ea23d4bbd01fe:parent:1:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 1.0,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "薪酬绩效科目的权重是多少？",
+      "user_groups": [
+        "hr"
+      ],
+      "retrieved_chunk_ids": [
+        "6cc7cb5e5f7f894deb06e8227f2ea23d4bbd01fe:parent:1:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 1.0,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "考试成绩保留多久？",
+      "user_groups": [
+        "hr"
+      ],
+      "retrieved_chunk_ids": [
+        "6cc7cb5e5f7f894deb06e8227f2ea23d4bbd01fe:parent:1:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 1.0,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "E-1002 是什么故障？",
+      "user_groups": [],
+      "retrieved_chunk_ids": [],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "leakage": false
+    }
+  ],
+  "reranked": [
+    {
+      "query": "E-1002 是什么故障？",
+      "user_groups": [
+        "public"
+      ],
+      "retrieved_chunk_ids": [
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:2:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:3:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:1:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "E-1003 应该怎么处理？",
+      "user_groups": [
+        "public"
+      ],
+      "retrieved_chunk_ids": [
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:2:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:3:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:1:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "设备连续运行 500 小时后要做什么？",
+      "user_groups": [
+        "public"
+      ],
+      "retrieved_chunk_ids": [
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:3:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:1:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:2:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "E001 怎么处理？",
+      "user_groups": [
+        "eng"
+      ],
+      "retrieved_chunk_ids": [
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:2:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:3:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:1:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "E002 的处理动作是什么？",
+      "user_groups": [
+        "eng"
+      ],
+      "retrieved_chunk_ids": [
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:2:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:3:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:1:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "更换发动机部件后要记录什么？",
+      "user_groups": [
+        "eng"
+      ],
+      "retrieved_chunk_ids": [
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:3:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:1:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:2:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "劳动法规考试占比多少？",
+      "user_groups": [
+        "hr"
+      ],
+      "retrieved_chunk_ids": [
+        "6cc7cb5e5f7f894deb06e8227f2ea23d4bbd01fe:parent:1:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 1.0,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "薪酬绩效科目的权重是多少？",
+      "user_groups": [
+        "hr"
+      ],
+      "retrieved_chunk_ids": [
+        "6cc7cb5e5f7f894deb06e8227f2ea23d4bbd01fe:parent:1:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 1.0,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "考试成绩保留多久？",
+      "user_groups": [
+        "hr"
+      ],
+      "retrieved_chunk_ids": [
+        "6cc7cb5e5f7f894deb06e8227f2ea23d4bbd01fe:parent:1:1:child:1"
+      ],
+      "recall": 1.0,
+      "precision": 1.0,
+      "mrr": 1.0,
+      "leakage": false
+    },
+    {
+      "query": "E-1002 是什么故障？",
+      "user_groups": [],
+      "retrieved_chunk_ids": [],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "leakage": false
+    }
+  ],
+  "baseline_summary": {
+    "case_count": 10,
+    "nonempty_hit_cases": 9,
+    "recall": 0.9,
+    "precision": 0.5,
+    "mrr": 0.9,
+    "leakage_cases": 0
+  },
+  "reranked_summary": {
+    "case_count": 10,
+    "nonempty_hit_cases": 9,
+    "recall": 0.9,
+    "precision": 0.5,
+    "mrr": 0.9,
+    "leakage_cases": 0
+  },
+  "rerank_target_moves": [],
+  "authorization_summary": {
+    "case_count": 9,
+    "nonempty_hit_cases": 9,
+    "recall": 0.0,
+    "precision": 0.0,
+    "mrr": 0.0,
+    "leakage_cases": 0
+  },
+  "authorization": [
+    {
+      "query": "E001 怎么处理？",
+      "user_groups": [
+        "public"
+      ],
+      "retrieved_chunk_ids": [
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:2:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:3:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:1:1:child:1"
+      ],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "leakage": false
+    },
+    {
+      "query": "E002 的处理动作是什么？",
+      "user_groups": [
+        "public"
+      ],
+      "retrieved_chunk_ids": [
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:2:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:3:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:1:1:child:1"
+      ],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "leakage": false
+    },
+    {
+      "query": "更换发动机部件后要记录什么？",
+      "user_groups": [
+        "public"
+      ],
+      "retrieved_chunk_ids": [
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:3:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:2:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:1:1:child:1"
+      ],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "leakage": false
+    },
+    {
+      "query": "劳动法规考试占比多少？",
+      "user_groups": [
+        "public"
+      ],
+      "retrieved_chunk_ids": [
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:2:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:1:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:3:1:child:1"
+      ],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "leakage": false
+    },
+    {
+      "query": "薪酬绩效科目的权重是多少？",
+      "user_groups": [
+        "public"
+      ],
+      "retrieved_chunk_ids": [
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:2:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:1:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:3:1:child:1"
+      ],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "leakage": false
+    },
+    {
+      "query": "考试成绩保留多久？",
+      "user_groups": [
+        "public"
+      ],
+      "retrieved_chunk_ids": [
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:3:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:2:1:child:1",
+        "e19d538bc0a48d5352e4f9d2ad69a15d5ed5d047:parent:1:1:child:1"
+      ],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "leakage": false
+    },
+    {
+      "query": "劳动法规考试占比多少？",
+      "user_groups": [
+        "eng"
+      ],
+      "retrieved_chunk_ids": [
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:2:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:1:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:3:1:child:1"
+      ],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "leakage": false
+    },
+    {
+      "query": "薪酬绩效科目的权重是多少？",
+      "user_groups": [
+        "eng"
+      ],
+      "retrieved_chunk_ids": [
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:1:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:3:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:2:1:child:1"
+      ],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "leakage": false
+    },
+    {
+      "query": "考试成绩保留多久？",
+      "user_groups": [
+        "eng"
+      ],
+      "retrieved_chunk_ids": [
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:3:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:2:1:child:1",
+        "a59199e445717b0ae1b2fd58764d75e7108f2f04:parent:1:1:child:1"
+      ],
+      "recall": 0.0,
+      "precision": 0.0,
+      "mrr": 0.0,
+      "leakage": false
+    }
+  ]
+}

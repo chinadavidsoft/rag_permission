@@ -1,0 +1,32 @@
+{
+  "llm_mode": "stable_fixture",
+  "requests": 20,
+  "ingest_seconds": 24.48620120799751,
+  "run_seconds": 0.5154843329946743,
+  "latency_percentiles_ms": {
+    "check_citations": {
+      "p50_ms": 0.01570799940964207,
+      "p95_ms": 0.04116600030101836
+    },
+    "generate": {
+      "p50_ms": 0.044792002881877124,
+      "p95_ms": 0.09166599920718
+    },
+    "llm_generate": {
+      "p50_ms": 0.003958004526793957,
+      "p95_ms": 0.00983399513643235
+    },
+    "retrieve": {
+      "p50_ms": 11.55566699890187,
+      "p95_ms": 57.7026669998304
+    }
+  },
+  "usage_summary": {
+    "trace_count": 20,
+    "prompt_tokens": 3240,
+    "completion_tokens": 864,
+    "prompt_cost": 0.0,
+    "completion_cost": 0.0,
+    "total_cost": 0.0
+  }
+}

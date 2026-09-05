@@ -43,6 +43,29 @@ class RetrievalEvaluation:
     leakage: bool
 
 
+@dataclass(frozen=True, slots=True)
+class RetrievalSummary:
+    case_count: int
+    nonempty_hit_cases: int
+    recall: float
+    precision: float
+    mrr: float
+    leakage_cases: int
+
+
+def summarize_evaluations(results: list[RetrievalEvaluation]) -> RetrievalSummary:
+    if not results:
+        return RetrievalSummary(0, 0, 0.0, 0.0, 0.0, 0)
+    return RetrievalSummary(
+        case_count=len(results),
+        nonempty_hit_cases=sum(bool(result.retrieved_chunk_ids) for result in results),
+        recall=sum(result.recall for result in results) / len(results),
+        precision=sum(result.precision for result in results) / len(results),
+        mrr=sum(result.mrr for result in results) / len(results),
+        leakage_cases=sum(result.leakage for result in results),
+    )
+
+
 def evaluate_case(case: GoldenCase, hits: list[SearchHit], k: int = 8) -> RetrievalEvaluation:
     retrieved = [hit.chunk.chunk_id for hit in hits[:k]]
     relevant = list(case.relevant_chunk_ids)
@@ -73,3 +96,7 @@ class EvaluationRunner:
 def load_golden_set(path: Path | str) -> list[GoldenCase]:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     return [GoldenCase.from_dict(item) for item in data["cases"]]
+
+
+def evaluation_key(result: RetrievalEvaluation) -> tuple[str, tuple[str, ...]]:
+    return result.query, result.user_groups
