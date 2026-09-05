@@ -1,6 +1,6 @@
 import uuid
 from collections.abc import Iterator
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from rag_permission.citations import (
     Citation,
@@ -18,6 +18,8 @@ SYSTEM_PROMPT = """你是一个企业知识库助手。只使用用户消息中�
 每个实质性事实都必须紧跟对应资料编号，例如 [1] 或 [2]。不要使用外部知识。
 如果资料不足或没有相关资料，只回答：“未找到权限范围内相关资料。”
 """
+
+REFUSAL_ANSWER = "未找到权限范围内相关资料。"
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,6 +43,7 @@ class UsageEvent:
 
 @dataclass(frozen=True, slots=True)
 class AnswerCompleteEvent:
+    answer: str
     citations: list[Citation]
     citation_report: CitationReport
     usage: LLMUsage
@@ -71,6 +74,18 @@ def display_citations(answer: str, citations: list[Citation]) -> tuple[list[Cita
     if is_refusal(answer):
         return [], CitationChecker().check(answer, [])
     report = CitationChecker().check(answer, citations)
+    if report.suspected_hallucination:
+        refusal = "未找到权限范围内相关资料。"
+        refusal_report = CitationChecker().check(refusal, [])
+        refusal_report = replace(
+            refusal_report,
+            has_citations=report.has_citations,
+            valid_citations=report.valid_citations,
+            invalid_citations=report.invalid_citations,
+            suspected_hallucination=True,
+            issues=report.issues + ("refusal_enforced",),
+        )
+        return [], refusal_report
     valid_numbers = set(report.valid_citations)
     shown = [citation for citation in citations if citation.number in valid_numbers]
     return shown, CitationChecker().check(answer, shown)
@@ -94,7 +109,8 @@ def generate_answer(
     citations = citations_from_hits(hits)
     with tracer.span("check_citations", trace_id):
         shown, report = display_citations(response.text, citations)
-    return AnswerResult(response.text, shown, report, response.usage, trace_id)
+    answer = REFUSAL_ANSWER if "refusal_enforced" in report.issues else response.text
+    return AnswerResult(answer, shown, report, response.usage, trace_id)
 
 
 def stream_answer(
@@ -108,8 +124,14 @@ def stream_answer(
     trace_id = trace_id or uuid.uuid4().hex
     tracer = tracer or NullTracer()
     if not hits:
-        yield TokenEvent("未找到权限范围内相关资料。")
-        yield AnswerCompleteEvent([], CitationChecker().check("未找到权限范围内相关资料。", []), LLMUsage(), trace_id)
+        yield TokenEvent(REFUSAL_ANSWER)
+        yield AnswerCompleteEvent(
+            REFUSAL_ANSWER,
+            [],
+            CitationChecker().check(REFUSAL_ANSWER, []),
+            LLMUsage(),
+            trace_id,
+        )
         return
 
     prompt = build_prompt(query, hits)
@@ -126,4 +148,8 @@ def stream_answer(
     citations = citations_from_hits(hits)
     with tracer.span("check_citations", trace_id):
         shown, report = display_citations(answer, citations)
-    yield AnswerCompleteEvent(shown, report, usage, trace_id)
+    final_answer = answer
+    enforced_refusal = "refusal_enforced" in report.issues
+    if enforced_refusal:
+        final_answer = REFUSAL_ANSWER
+    yield AnswerCompleteEvent(final_answer, shown, report, usage, trace_id)

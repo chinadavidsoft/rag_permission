@@ -72,12 +72,41 @@ def test_generate_answer_refusal_has_no_citations():
     assert result.citations == []
 
 
+def test_generate_answer_enforces_refusal_for_invalid_citation():
+    class InvalidCitationLLM(FakeLLM):
+        def complete(self, system: str, user: str, temperature: float = 0.0) -> LLMResponse:
+            return LLMResponse("风扇故障 [9]。", LLMUsage(prompt_tokens=5, completion_tokens=3))
+
+    result = generate_answer("E-1002 是什么？", [_hit()], InvalidCitationLLM())
+    assert result.answer == "未找到权限范围内相关资料。"
+    assert result.citations == []
+    assert "refusal_enforced" in result.citation_report.issues
+
+
+def test_generate_answer_enforces_refusal_without_citations():
+    class UncitedLLM(FakeLLM):
+        def complete(self, system: str, user: str, temperature: float = 0.0) -> LLMResponse:
+            return LLMResponse("风扇故障。", LLMUsage(prompt_tokens=5, completion_tokens=3))
+
+    result = generate_answer("E-1002 是什么？", [_hit()], UncitedLLM())
+    assert result.answer == "未找到权限范围内相关资料。"
+    assert result.citation_report.suspected_hallucination
+
+
 def test_feedback_store_records_trace_and_clusters_failures():
     with tempfile.TemporaryDirectory() as directory:
         store = FeedbackStore(Path(directory) / "feedback.db")
         user = User(id="u", groups=frozenset({"public"}))
         store.record_trace("t1", user, "q", "a", [_hit()], [], LLMUsage())
+        store.record_trace(
+            "t2", user, "q", "a", [_hit()], [], LLMUsage(1000, 500), prompt_cost=0.2, completion_cost=0.3
+        )
         assert store.save_feedback("t1", "down")
         assert not store.save_feedback("missing", "down")
         report = store.weekly_failure_report()
         assert report[0].doc_id == "doc"
+        summary = store.usage_summary()
+        assert summary.trace_count == 2
+        assert summary.prompt_tokens == 1000
+        assert summary.completion_tokens == 500
+        assert summary.total_cost == 0.5
