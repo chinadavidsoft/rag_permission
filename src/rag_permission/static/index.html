@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>企业知识库问答</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: #f6f7f4; color: #1c2624;
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .app { display: grid; grid-template-rows: auto 1fr auto; height: 100vh; max-width: 920px; margin: 0 auto; }
+    header {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 16px 20px; border-bottom: 1px solid #d9ded7; background: #fff;
+    }
+    .brand { font-size: 18px; font-weight: 700; letter-spacing: 0; }
+    .auth { display: flex; align-items: center; gap: 8px; }
+    .field {
+      height: 34px; border: 1px solid #c8cdc7; border-radius: 5px; padding: 0 9px;
+      background: #fff; min-width: 86px; font-size: 13px;
+    }
+    .chat { overflow-y: auto; padding: 22px 20px; }
+    .message { max-width: 82%; margin-bottom: 14px; line-height: 1.6; font-size: 15px; }
+    .user { margin-left: auto; padding: 10px 12px; background: #175d57; color: #fff; border-radius: 8px; }
+    .assistant { padding: 12px 0; border-bottom: 1px solid #e1e4df; }
+    .empty { color: #66716c; font-size: 15px; text-align: center; margin-top: 12vh; }
+    .citations { display: grid; gap: 8px; margin-top: 12px; }
+    .citation {
+      display: flex; gap: 8px; align-items: center; min-width: 0; padding: 8px 10px;
+      border: 1px solid #ccd4cd; border-radius: 6px; background: #fff; font-size: 13px;
+    }
+    .citation strong { flex: 0 0 auto; }
+    .citation span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .actions { display: flex; gap: 8px; margin-top: 10px; }
+    .action {
+      display: inline-flex; align-items: center; gap: 5px; height: 32px; padding: 0 9px;
+      border: 1px solid #c8cdc7; border-radius: 5px; background: #fff; cursor: pointer; font-size: 13px;
+    }
+    .action:hover { border-color: #175d57; color: #175d57; }
+    .composer { border-top: 1px solid #d9ded7; background: #fff; padding: 14px 20px 18px; }
+    .input-row { display: flex; gap: 9px; }
+    textarea {
+      flex: 1; min-height: 45px; max-height: 130px; resize: none; border: 1px solid #c8cdc7;
+      border-radius: 6px; padding: 11px; font: inherit;
+    }
+    .send {
+      width: 45px; border: 0; border-radius: 6px; background: #175d57; color: #fff; cursor: pointer;
+      display: grid; place-items: center;
+    }
+    .send:disabled { opacity: .55; cursor: not-allowed; }
+    @media (max-width: 640px) {
+      header { flex-direction: column; align-items: stretch; }
+      .message { max-width: 95%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">企业知识库问答</div>
+      <div class="auth">
+        <input id="userId" class="field" value="public-user" aria-label="用户 ID">
+        <input id="userGroups" class="field" value="public" aria-label="用户组">
+      </div>
+    </header>
+    <main id="chat" class="chat">
+      <div class="empty">输入问题开始</div>
+    </main>
+    <div class="composer">
+      <div class="input-row">
+        <textarea id="query" rows="1" placeholder="输入问题"></textarea>
+        <button id="send" class="send" aria-label="发送"><i data-lucide="send-horizontal"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const query = document.getElementById('query');
+    const send = document.getElementById('send');
+    let currentTrace = null;
+
+    function scrollDown() { chat.scrollTop = chat.scrollHeight; }
+    function textNode(text) {
+      const node = document.createElement('div');
+      node.className = 'message';
+      node.textContent = text;
+      return node;
+    }
+
+    function citationCard(item) {
+      const card = document.createElement('div');
+      card.className = 'citation';
+      const number = document.createElement('strong');
+      number.textContent = `[${item.number}]`;
+      const detail = document.createElement('span');
+      detail.textContent = `${item.title} · ${item.section_path.join(' > ') || '未分类'}`;
+      card.append(number, detail);
+      return card;
+    }
+
+    function feedbackButtons() {
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      [['up', 'thumbs-up'], ['down', 'thumbs-down']].forEach(([rating, icon]) => {
+        const button = document.createElement('button');
+        button.className = 'action';
+        button.innerHTML = `<i data-lucide="${icon}"></i>`;
+        button.setAttribute('aria-label', rating);
+        button.onclick = async () => {
+          if (!currentTrace) return;
+          await fetch('/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ trace_id: currentTrace, rating })
+          });
+          actions.remove();
+        };
+        actions.append(button);
+      });
+      return actions;
+    }
+
+    async function ask() {
+      const question = query.value.trim();
+      if (!question || send.disabled) return;
+      send.disabled = true;
+      query.value = '';
+      if (chat.querySelector('.empty')) chat.innerHTML = '';
+      chat.append(textNode(question));
+      const answer = document.createElement('div');
+      answer.className = 'message assistant';
+      const content = document.createElement('div');
+      const citations = document.createElement('div');
+      citations.className = 'citations';
+      answer.append(content, citations);
+      chat.append(answer);
+      scrollDown();
+
+      try {
+        const response = await fetch('/ask-stream', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-Id': document.getElementById('userId').value,
+            'X-User-Groups': document.getElementById('userGroups').value,
+          },
+          body: JSON.stringify({ query: question }),
+        });
+        if (!response.ok) throw new Error(await response.text());
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const chunks = buffer.split("\n\n");
+          buffer = chunks.pop();
+          for (const chunk of chunks) {
+            let eventName = 'message', data = '';
+            for (const line of chunk.split("\n")) {
+              if (line.startsWith('event:')) eventName = line.slice(6).trim();
+              if (line.startsWith('data:')) data += line.slice(5).trim();
+            }
+            if (!data) continue;
+            const payload = JSON.parse(data);
+            if (eventName === 'token') { content.textContent += payload.content; scrollDown(); }
+            if (eventName === 'citations') {
+              payload.citations.forEach(item => citations.append(citationCard(item)));
+              currentTrace = payload.trace_id;
+              answer.append(feedbackButtons());
+              lucide.createIcons();
+              scrollDown();
+            }
+          }
+        }
+      } catch (error) {
+        content.textContent = `请求失败：${error.message}`;
+      } finally {
+        send.disabled = false;
+        lucide.createIcons();
+      }
+    }
+
+    send.addEventListener('click', ask);
+    query.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); ask(); }
+    });
+    lucide.createIcons();
+  </script>
+</body>
+</html>
